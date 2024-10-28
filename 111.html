@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古风人物性格测试</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+        
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+            border: 1px solid #FDE68A;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            color: #78350F;
+            border-radius: 0.375rem;
+        }
+        
+        .btn:hover {
+            background: #FEF3C7;
+        }
+
+        .chinese-font {
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+
+        body {
+            background: url('/api/placeholder/1920/1080') center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .chevron-right {
+            width: 20px;
+            height: 20px;
+            color: #F59E0B;
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-2xl mx-auto">
+        <div class="quiz-card p-6 rounded-lg shadow-lg">
+            <div id="quiz-container">
+                <h1 class="text-3xl font-bold text-center mb-8 text-amber-800 chinese-font">
+                    古风人物性格测试
+                </h1>
+                <div class="space-y-6">
+                    <h2 id="question" class="text-xl font-semibold mb-4 text-amber-700"></h2>
+                    <div id="options" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                    <div id="progress" class="text-center text-amber-600 mt-4"></div>
+                </div>
+            </div>
+            
+            <div id="result-container" class="text-center space-y-6 hidden">
+                <h2 class="text-3xl font-bold mb-4 text-amber-800 chinese-font">
+                    测试结果
+                </h2>
+                <div class="space-y-4">
+                    <div id="result-character" class="text-4xl font-bold text-amber-700 mb-4"></div>
+                    <div id="result-description" class="text-lg text-amber-600 mb-8"></div>
+                </div>
+                <button onclick="resetQuiz()" class="btn bg-amber-600 hover:bg-amber-700 text-white">
+                    <span>重新测试</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "你喜欢的音乐或旋律是什么样的？",
+                options: ["柔和的轻音乐", "流行音乐", "摇滚等富有节奏感的音乐"],
+                points: [2, 2, 3]
+            },
+            {
+                question: "你喜欢哪种类型的色彩？",
+                options: ["透明感的中间色（米黄、粉红）", "原始色彩（三原色）", "沉暗且稳重的色彩（深灰色、棕色）"],
+                points: [1, 2, 3]
+            },
+            {
+                question: "你更喜欢去什么样的地方旅游？",
+                options: ["大自然美丽风光的地方", "有历史厚重感或古代遗迹的地方", "比较著名的观光地或新建的网红打卡点"],
+                points: [2, 2, 3]
+            },
+            {
+                question: "你的性别是：",
+                options: ["男", "女"],
+                isGenderQuestion: true
+            }
+        ];
+
+        const maleBodyQuestions = {
+            question: "你最喜欢女性的那些部位",
+            options: ["丰满的胸部", "纤细的腰肢", "修长的大腿", "没什么特别喜欢的"],
+            values: ["z", "x", "v", "n"]
+        };
+
+        const femaleBodyQuestions = {
+            question: "你最喜欢男性的那些部位",
+            options: ["雕塑般的肩膀", "宽广的后背", "精致的腹肌", "线条优美的臀部", "没什么喜欢的"],
+            values: ["a", "b", "c", "d", "e"]
+        };
+
+        const additionalQuestions = [
+            {
+                question: "在自己的生日或某些节日上，你更想如何庆祝？",
+                options: ["对这些节日并不会很期待", "会想和一些好朋友一起欢聚", "更期待一些人给你独特的惊喜"],
+                points: [2, 4, 1]
+            },
+            {
+                question: "在对话时，你最想叫哪一种人,不要再说了?",
+                options: ["一直说别人坏话或恶意中伤别人的人", "一直诉说自己烦恼的事或自怨自艾的人", "一直夸耀自己的人"],
+                points: [4, 2, 2]
+            },
+            {
+                question: "对你而言，哪一类事情常令你觉得困扰？",
+                options: ["人际关系", "人生道路的选择", "恋爱"],
+                points: [2, 4, 5]
+            },
+            {
+                question: "你和异性都做过什么事",
+                options: ["牵手", "亲吻", "性行为", "什么都没有发生过"],
+                isRelationshipQuestion: true
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = {
+            gender: null,
+            bodyPreference: null,
+            relationshipStatus: null
+        };
+
+        const descriptions = {
+            '李白': '你如李白般豪放不羁，才华横溢，是个充满浪漫主义色彩的人物。',
+            '狼妖': '你性格独特，神秘莫测，如狼妖般充满野性与魅力。',
+            '纨绔子弟': '你生性豪爽，不拘小节，享受生活的乐趣。',
+            '皇亲国戚': '你处事稳重，有领导才能，受人尊重。',
+            '将军': '你意志坚定，果断勇敢，是个有担当的人。',
+            '某游历人间的隐士': '你超然物外，智慧深邃，对生活有独特的见解。',
+            '权臣': '你善于谋划，处事圆滑，具有很强的社交能力。',
+            '江湖老大': '你重情重义，有自己的处世哲学，是可靠的伙伴。',
+            '李清照': '你才情优雅，感情丰富，富有文学艺术天赋。',
+            '武则天': '你雄才大略，意志坚强，是天生的领导者。',
+            '花木兰': '你勇敢无畏，忠诚尽责，富有献身精神。',
+            '狐妖': '你聪慧灵动，魅力非凡，充满神秘气质。'
+        };
+
+        function getCurrentQuestion() {
+            if (currentQuestion < questions.length) {
+                return questions[currentQuestion];
+            }
+            
+            if (currentQuestion === questions.length) {
+                return answers.gender === 1 ? maleBodyQuestions : femaleBodyQuestions;
+            }
+            
+            return additionalQuestions[currentQuestion - questions.length - 1];
+        }
+
+        function getTotalQuestions() {
+            return questions.length + 1 + additionalQuestions.length;
+        }
+
+        function handleAnswer(optionIndex) {
+            const currentQ = getCurrentQuestion();
+            
+            if (currentQ.isGenderQuestion) {
+                answers.gender = optionIndex + 1;
+            } else if (currentQ.isRelationshipQuestion) {
+                const relationshipValues = ["f", "g", "h", "i"];
+                answers.relationshipStatus = relationshipValues[optionIndex];
+            } else if (currentQ === maleBodyQuestions || currentQ === femaleBodyQuestions) {
+                answers.bodyPreference = currentQ.values[optionIndex];
+            } else if (currentQ.points) {
+                score += currentQ.points[optionIndex];
+            }
+
+            if (currentQuestion === getTotalQuestions() - 1) {
+                calculateResult();
+            } else {
+                currentQuestion++;
+                updateQuiz();
+            }
+        }
+
+        function calculateResult() {
+            let finalResult = '';
+            
+            if (answers.gender === 1) { // 男性
+                const maleResults = {
+                    'z': score < 14 ? '狼妖' : '李白',
+                    'x': score < 14 ? '纨绔子弟' : '皇亲国戚',
+                    'v': score < 14 ? '将军' : '某游历人间的隐士',
+                    'n': score < 14 ? '权臣' : '江湖老大'
+                };
+                finalResult = maleResults[answers.bodyPreference] || '未知结果';
+            } else { // 女性
+                const femaleResults = {
+                    'a': {'f': '李清照', 'g': '武则天', 'h': '花木兰', 'i': '狐妖'},
+                    'b': {'f': '皇宫贵族', 'g': '书香门第的千金小姐', 'h': '英勇美丽的女将军', 'i': '王昭君'},
+                    'c': {'f': '穆桂英', 'g': '冼夫人', 'h': '异域美人', 'i': '奢香夫人'},
+                    'd': {'f': '女探险家', 'g': '女艺术家', 'h': '上官婉儿', 'i': '王贞仪'},
+                    'e': {'f': '谢道韫', 'g': '班昭', 'h': '芈八子', 'i': '文成公主'}
+                };
+                
+                if (femaleResults[answers.bodyPreference] && 
+                    femaleResults[answers.bodyPreference][answers.relationshipStatus]) {
+                    finalResult = femaleResults[answers.bodyPreference][answers.relationshipStatus];
+                } else {
+                    finalResult = '未知结果';
+                }
+            }
+            
+            showResult(finalResult);
+        }
+
+        function showResult(result) {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+            document.getElementById('result-character').textContent = `你的角色是：${result}`;
+            document.getElementById('result-description').textContent = descriptions[result] || 
+                '你是一个独特而神秘的角色，蕴含着无限可能。';
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answers = {
+                gender: null,
+                bodyPreference: null,
+                relationshipStatus: null
+            };
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            updateQuiz();
+        }
+
+        function updateQuiz() {
+            const currentQ = getCurrentQuestion();
+            document.getElementById('question').textContent = currentQ.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = currentQ.options.map((option, index) => `
+                <button class="btn" onclick="handleAnswer(${index})">
+                    <span>${option}</span>
+                    <svg class="chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            `).join('');
+            
+            document.getElementById('progress').textContent = 
+                `问题 ${currentQuestion + 1} / ${getTotalQuestions()}`;
+        }
+
+        // 初始化测试
+        updateQuiz();
+    </script>
+</body>
+</html>
